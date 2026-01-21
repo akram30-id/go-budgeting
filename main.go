@@ -32,5 +32,5 @@ func main() {
 	webhook.Post("/clients", controllers.RegisterClient).Use(middleware.ApiAuth)
 	webhook.Post("/publish", controllers.PushToQueue).Use(middleware.ApiAuth)
 
-	app.Listen(":3001")
+	app.Listen(":3000")
 }
