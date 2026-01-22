@@ -41,7 +41,7 @@ func ValidatePayload(cBody []byte, req interface{}) string {
 			var msg string
 			switch firstErr.Tag() {
 			case "required":
-				msg = fmt.Sprintf("%s is required", jsonKey)
+				msg = fmt.Sprintf("%s wajib diisi", jsonKey)
 			case "min":
 				msg = fmt.Sprintf("%s minimum length %s", jsonKey, firstErr.Param())
 			case "gt":

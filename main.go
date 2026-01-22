@@ -1,11 +1,14 @@
 package main
 
 import (
+	"time"
+
 	"api-budgeting.smartcodex.cloud/config"
 	"api-budgeting.smartcodex.cloud/controllers"
 	"api-budgeting.smartcodex.cloud/middleware"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/limiter"
 )
 
 func main() {
@@ -16,10 +19,18 @@ func main() {
 	// config.DB.AutoMigrate(&models.Item{}, &models.Client{}, &models.Webhook{}, &models.QueueLog{}, &models.ConsumerLog{})
 	config.DB.AutoMigrate()
 
+	// throttling
+	appLimiter := limiter.New(limiter.Config{
+		Max:        5,
+		Expiration: 30 * time.Second,
+	})
+
 	// routes
 
 	// TESTING ENDPOINT
-	app.Post("/api-test", controllers.TestPush)
+	app.Post("/api-test", appLimiter, controllers.TestPush)
+
+	app.Post("/register", appLimiter, controllers.Register)
 
 	api := app.Group("/api")
 	api.Post("/items", controllers.CreateItem).Use(middleware.ApiAuth)
