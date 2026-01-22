@@ -16,3 +16,18 @@ func ErrorResponse(c *fiber.Ctx, code int, msg string) error {
 		"message": msg,
 	})
 }
+
+type ReturnService struct {
+	Message  string
+	Code     string
+	Success  bool
+	Data     map[string]any
+	HttpCode int
+}
+
+func NewReturnService() ReturnService {
+	return ReturnService{
+		HttpCode: 200,
+		Success:  true,
+	}
+}
