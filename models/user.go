@@ -18,3 +18,21 @@ type ReturnRole struct {
 	Message string
 	Data    Roles
 }
+
+type ReturnService struct {
+	Success bool
+	Message string
+	Data    Roles
+}
+
+type ReqUserLogin struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UserLoginSuccess struct {
+	ID     int    `json:"user_id"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
+	RoleId int    `json:"role_id"`
+}

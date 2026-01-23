@@ -35,3 +35,34 @@ func Register(c *fiber.Ctx) error {
 	return helpers.SuccessResponse(c, registerService.Data)
 
 }
+
+func Login(c *fiber.Ctx) error {
+
+	var reqValidate validations.LoginUserValidation
+
+	body := c.Body()
+
+	err := helpers.ValidatePayload(body, &reqValidate)
+	if err != "" {
+		return helpers.ErrorResponse(c, 422, err)
+	}
+
+	req := models.ReqUserLogin{
+		Email:    reqValidate.Email,
+		Password: reqValidate.Password,
+	}
+
+	login := services.Login(req)
+
+	if !login.Success {
+		return helpers.ErrorResponse(c, 401, login.Message)
+	}
+
+	return c.Status(200).JSON(fiber.Map{
+		"success": true,
+		"message": login.Message,
+		"token":   login.Token,
+		"user":    login.User,
+	})
+
+}

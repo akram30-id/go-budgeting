@@ -7,6 +7,7 @@ import (
 	"api-budgeting.smartcodex.cloud/config"
 	"api-budgeting.smartcodex.cloud/helpers"
 	"api-budgeting.smartcodex.cloud/models"
+	"api-budgeting.smartcodex.cloud/services/auth"
 )
 
 func RegisterUser(register models.ReqRegisterUser) helpers.ReturnService {
@@ -129,6 +130,84 @@ func roleCheck(roleId int) models.ReturnRole {
 		Success: true,
 		Message: "Success",
 		Data:    role,
+	}
+
+}
+
+func Login(user models.ReqUserLogin) helpers.LoginResponse {
+
+	db := config.DB
+
+	hash := md5.New()
+	hash.Write([]byte(user.Password))
+
+	user.Password = hex.EncodeToString(hash.Sum(nil))
+
+	type UserResult struct {
+		ID       int
+		Email    string
+		Password string
+		Name     string
+		RoleId   int
+	}
+
+	var userResult UserResult
+
+	err := db.Raw("SELECT id, email, password, name, role_id FROM users WHERE email=? AND password=? LIMIT 1", user.Email, user.Password).Scan(&userResult).Error
+
+	if err != nil {
+
+		return helpers.LoginResponse{
+			Success: false,
+			Message: "Terdapat kesalahan (unexpected).",
+		}
+	}
+
+	if userResult.Email == "" && userResult.Password == "" {
+		return helpers.LoginResponse{
+			Success: false,
+			Message: "Email atau password tidak valid.",
+		}
+	}
+
+	generateToken := auth.CreateToken(userResult.ID)
+
+	if !generateToken.Success {
+		return helpers.LoginResponse{
+			Success: false,
+			Message: generateToken.Message,
+		}
+	}
+
+	loginData := models.UserLoginSuccess{
+		ID:     userResult.ID,
+		Name:   userResult.Name,
+		Email:  userResult.Email,
+		RoleId: userResult.RoleId,
+	}
+
+	tokenData, ok := generateToken.Data.(map[string]any)
+	if !ok {
+
+		return helpers.LoginResponse{
+			Success: false,
+			Message: "Failed to parse mapping token.",
+		}
+	}
+
+	token, ok := tokenData["token"].(string)
+	if !ok {
+		return helpers.LoginResponse{
+			Success: false,
+			Message: "Failed to parse token.",
+		}
+	}
+
+	return helpers.LoginResponse{
+		Success: true,
+		Message: "Login Berhasil.",
+		Token:   token,
+		User:    loginData,
 	}
 
 }

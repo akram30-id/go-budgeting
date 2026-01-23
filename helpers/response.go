@@ -1,6 +1,9 @@
 package helpers
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"api-budgeting.smartcodex.cloud/models"
+	"github.com/gofiber/fiber/v2"
+)
 
 func SuccessResponse(c *fiber.Ctx, data interface{}) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
@@ -21,7 +24,7 @@ type ReturnService struct {
 	Message  string
 	Code     string
 	Success  bool
-	Data     map[string]any
+	Data     any
 	HttpCode int
 }
 
@@ -30,4 +33,11 @@ func NewReturnService() ReturnService {
 		HttpCode: 200,
 		Success:  true,
 	}
+}
+
+type LoginResponse struct {
+	Success bool                    `json:"success"`
+	Message string                  `json:"message"`
+	Token   string                  `json:"token"`
+	User    models.UserLoginSuccess `json:"user"`
 }

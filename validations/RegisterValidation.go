@@ -7,3 +7,8 @@ type RegisterUserValidation struct {
 	ConfirmPassword string `json:"confirm_password" validate:"required"`
 	RoleId          int    `json:"role_id" validate:"required"`
 }
+
+type LoginUserValidation struct {
+	Email    string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required"`
+}
