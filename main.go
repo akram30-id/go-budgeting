@@ -5,7 +5,6 @@ import (
 
 	"api-budgeting.smartcodex.cloud/config"
 	"api-budgeting.smartcodex.cloud/controllers"
-	"api-budgeting.smartcodex.cloud/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -30,18 +29,20 @@ func main() {
 	// TESTING ENDPOINT
 	app.Post("/api-test", appLimiter, controllers.TestPush)
 
-	app.Post("/register", appLimiter, controllers.Register)
-
 	api := app.Group("/api")
-	api.Post("/items", controllers.CreateItem).Use(middleware.ApiAuth)
-	api.Get("/items", controllers.GetItems).Use(middleware.ApiAuth)
-	api.Get("/items/:id", controllers.GetItem).Use(middleware.ApiAuth)
-	api.Put("/items/:id", controllers.UpdateItem).Use(middleware.ApiAuth)
-	api.Delete("/items/:id", controllers.DeleteItem).Use(middleware.ApiAuth)
 
-	webhook := api.Group("/webhook")
-	webhook.Post("/clients", controllers.RegisterClient).Use(middleware.ApiAuth)
-	webhook.Post("/publish", controllers.PushToQueue).Use(middleware.ApiAuth)
+	api.Post("/register", appLimiter, controllers.Register)
+	api.Post("/login", appLimiter, controllers.Login)
+
+	// api.Post("/items", controllers.CreateItem).Use(middleware.ApiAuth)
+	// api.Get("/items", controllers.GetItems).Use(middleware.ApiAuth)
+	// api.Get("/items/:id", controllers.GetItem).Use(middleware.ApiAuth)
+	// api.Put("/items/:id", controllers.UpdateItem).Use(middleware.ApiAuth)
+	// api.Delete("/items/:id", controllers.DeleteItem).Use(middleware.ApiAuth)
+
+	// webhook := api.Group("/webhook")
+	// webhook.Post("/clients", controllers.RegisterClient).Use(middleware.ApiAuth)
+	// webhook.Post("/publish", controllers.PushToQueue).Use(middleware.ApiAuth)
 
 	app.Listen(":3000")
 }
