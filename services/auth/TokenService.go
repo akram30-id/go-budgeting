@@ -36,7 +36,7 @@ func CreateToken(userId int) helpers.ReturnService {
 
 	hashedToken := hex.EncodeToString(hash.Sum(nil))
 
-	if err := db.Exec("INSERT INTO personal_access_tokens (tokenable_type, tokenable_id, name, token, abilities, created_at) VALUES (?, ?, ?, ?, ?, ?)", "App\\Models\\User", userId, "api-token", hashedToken, "['*']", time.Now()).Error; err != nil {
+	if err := db.Exec("INSERT INTO personal_access_tokens (tokenable_type, tokenable_id, name, token, abilities, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)", "App\\Models\\User", userId, "api-token", hashedToken, "['*']", time.Now(), time.Now()).Error; err != nil {
 		return helpers.ReturnService{
 			Message:  err.Error(),
 			Code:     "500G01",
