@@ -1,8 +1,10 @@
 package middleware
 
 import (
-	"fmt"
+	"crypto/sha256"
+	"encoding/hex"
 	"regexp"
+	"strings"
 
 	"api-budgeting.smartcodex.cloud/config"
 	"api-budgeting.smartcodex.cloud/helpers"
@@ -23,7 +25,7 @@ func ApiAuth(c *fiber.Ctx) error {
 	isBearer, err := regexp.MatchString(`(?i)^Bearer`, apiKey)
 
 	if err != nil {
-		return helpers.ErrorResponse(c, 500, "Failed to authorized this request.")
+		return helpers.ErrorResponse(c, 500, "Failed to authorized this request. (BEARER_N_A)")
 	}
 
 	if !isBearer {
@@ -32,9 +34,20 @@ func ApiAuth(c *fiber.Ctx) error {
 
 	cleanToken := RemoveBearer(apiKey)
 
+	tokenParts := strings.Split(cleanToken, "|")
+	if len(tokenParts) != 2 {
+		return helpers.ErrorResponse(c, 401, "Invalid token authorization format.")
+	}
+
+	tokenId := tokenParts[0]
+	plainToken := tokenParts[1]
+
+	hash := sha256.Sum256([]byte(plainToken))
+	hashedToken := hex.EncodeToString(hash[:])
+
 	type TokenData struct {
-		Token  string
-		UserId int
+		Token       string
+		TokenableId int
 	}
 
 	var tokenData TokenData
@@ -43,8 +56,10 @@ func ApiAuth(c *fiber.Ctx) error {
 		SELECT a.token, a.tokenable_id
 		FROM personal_access_tokens AS a
 		WHERE a.token = ?
-		AND a.created_at >= NOW() - INTERVAL 2 HOUR
-	`, cleanToken).Scan(&tokenData).Error
+		AND a.id = ?
+		-- AND a.created_at >= NOW() - INTERVAL 2 HOUR
+		LIMIT 1
+	`, hashedToken, tokenId).Scan(&tokenData).Error
 
 	if errGetToken != nil {
 		return helpers.ErrorResponse(c, 500, "Something's wrong when fetching access token.")
@@ -54,20 +69,20 @@ func ApiAuth(c *fiber.Ctx) error {
 		return helpers.ErrorResponse(c, 401, "Token is invalid.")
 	}
 
-	fmt.Printf("User id: %d", tokenData.UserId)
+	isUserExist := GetUserById(tokenData.TokenableId)
 
-	isUserExist := GetUserById(tokenData.UserId)
-
-	if isUserExist["success"] == false {
-		if isUserExist["code"] == 404 {
+	if isUserExist.Success == false {
+		if isUserExist.Code == 404 {
 			return helpers.ErrorResponse(c, 404, "Invalid user service.")
 		} else {
 			return helpers.ErrorResponse(c, 500, "Internal server error (authentication).")
 		}
 	}
 
-	c.Set("token", tokenData.Token)
-	c.Locals("userId", tokenData.UserId)
+	c.Locals("userId", tokenData.TokenableId)
+	c.Locals("name", isUserExist.Data.Name)
+	c.Locals("email", isUserExist.Data.Email)
+	c.Locals("roleId", isUserExist.Data.RoleId)
 
 	return c.Next()
 
@@ -87,36 +102,42 @@ type AuthUser struct {
 	RoleId int
 }
 
-func GetUserById(userId int) map[string]any {
+type GetUserReturn struct {
+	Success bool
+	Code    int
+	Message string
+	Data    AuthUser
+}
+
+func GetUserById(userId int) GetUserReturn {
 
 	db := config.DB
 
 	var authUser AuthUser
 
-	getUser := db.Raw(`SELECT email, name, role_id FROM users WHERE id = ?`, userId).Scan(&authUser).Error
+	getUser := db.Raw(`SELECT email, name, role_id FROM users WHERE id = ?`, userId).First(&authUser).Error
 
 	if getUser != nil {
-		return map[string]any{
-			"success": false,
-			"code":    500,
-			"message": getUser.Error(),
+		return GetUserReturn{
+			Success: false,
+			Code:    500,
+			Message: getUser.Error(),
 		}
 	}
 
 	if authUser.Email == "" {
-		fmt.Printf("SELECT email, name, role_id FROM users WHERE id = %d", userId)
-
-		return map[string]any{
-			"success": false,
-			"code":    404,
-			"message": "No user found.",
+		return GetUserReturn{
+			Success: false,
+			Code:    404,
+			Message: "No user found.",
 		}
 	}
 
-	return map[string]any{
-		"success": true,
-		"code":    200,
-		"data":    authUser,
+	return GetUserReturn{
+		Success: true,
+		Code:    200,
+		Message: "Success",
+		Data:    authUser,
 	}
 
 }

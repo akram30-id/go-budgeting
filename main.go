@@ -32,8 +32,8 @@ func main() {
 
 	api := app.Group("/api")
 
-	api.Post("/register", appLimiter, controllers.Register)
-	api.Post("/login", appLimiter, controllers.Login)
+	// api.Post("/register", appLimiter, controllers.Register)
+	// api.Post("/login", appLimiter, controllers.Login)
 	api.Post("/test-middleware", middleware.ApiAuth, controllers.TestPush)
 
 	// api.Post("/items", controllers.CreateItem).Use(middleware.ApiAuth)

@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -20,6 +22,10 @@ func TestPush(c *fiber.Ctx) error {
 	// 		"message": "Invalid JSON body",
 	// 	})
 	// }
+
+	fmt.Printf("name: %s \n", c.Locals("name"))
+	fmt.Printf("email: %s \n", c.Locals("email"))
+	fmt.Printf("role_id: %d \n", c.Locals("roleId"))
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
 		"status":  true,
