@@ -5,6 +5,7 @@ import (
 
 	"api-budgeting.smartcodex.cloud/config"
 	"api-budgeting.smartcodex.cloud/controllers"
+	"api-budgeting.smartcodex.cloud/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -33,6 +34,7 @@ func main() {
 
 	api.Post("/register", appLimiter, controllers.Register)
 	api.Post("/login", appLimiter, controllers.Login)
+	api.Post("/test-middleware", middleware.ApiAuth, controllers.TestPush)
 
 	// api.Post("/items", controllers.CreateItem).Use(middleware.ApiAuth)
 	// api.Get("/items", controllers.GetItems).Use(middleware.ApiAuth)
