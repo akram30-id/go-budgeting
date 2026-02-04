@@ -6,7 +6,6 @@ import (
 	"api-budgeting.smartcodex.cloud/config"
 	"api-budgeting.smartcodex.cloud/controllers"
 	cashcontroller "api-budgeting.smartcodex.cloud/controllers/cash_controller"
-	debtcontroller "api-budgeting.smartcodex.cloud/controllers/debt.controller"
 	"api-budgeting.smartcodex.cloud/middleware"
 	"api-budgeting.smartcodex.cloud/models"
 
@@ -45,8 +44,8 @@ func main() {
 	// api.Post("/login", appLimiter, controllers.Login)
 	api.Post("/test-middleware", middleware.ApiAuth, controllers.TestPush)
 
-	debt := api.Group("/debt")
-	debt.Get("/vendors", middleware.ApiAuth, debtcontroller.ShowListVendors)
+	// debt := api.Group("/debt")
+	// debt.Get("/vendors", middleware.ApiAuth, debtcontroller.ShowListVendors)
 
 	cash := api.Group("/cash")
 	cash.Post("/sort-update", middleware.ApiAuth, cashcontroller.UpdateSortController)
