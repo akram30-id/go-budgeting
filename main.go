@@ -5,7 +5,10 @@ import (
 
 	"api-budgeting.smartcodex.cloud/config"
 	"api-budgeting.smartcodex.cloud/controllers"
+	cashcontroller "api-budgeting.smartcodex.cloud/controllers/cash_controller"
+	debtcontroller "api-budgeting.smartcodex.cloud/controllers/debt.controller"
 	"api-budgeting.smartcodex.cloud/middleware"
+	"api-budgeting.smartcodex.cloud/models"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
@@ -17,7 +20,13 @@ func main() {
 	// connect DB
 	config.ConnectDB()
 	// config.DB.AutoMigrate(&models.Item{}, &models.Client{}, &models.Webhook{}, &models.QueueLog{}, &models.ConsumerLog{})
-	config.DB.AutoMigrate()
+	config.DB.AutoMigrate(
+		&models.DebtVendor{},
+		&models.DebtAccount{},
+		&models.DebtVirtualAccount{},
+		&models.DebtOutstanding{},
+		&models.DebtPayment{},
+	)
 
 	// throttling
 	appLimiter := limiter.New(limiter.Config{
@@ -35,6 +44,12 @@ func main() {
 	// api.Post("/register", appLimiter, controllers.Register)
 	// api.Post("/login", appLimiter, controllers.Login)
 	api.Post("/test-middleware", middleware.ApiAuth, controllers.TestPush)
+
+	debt := api.Group("/debt")
+	debt.Get("/vendors", middleware.ApiAuth, debtcontroller.ShowListVendors)
+
+	cash := api.Group("/cash")
+	cash.Post("/sort-update", middleware.ApiAuth, cashcontroller.UpdateSortController)
 
 	// api.Post("/items", controllers.CreateItem).Use(middleware.ApiAuth)
 	// api.Get("/items", controllers.GetItems).Use(middleware.ApiAuth)
