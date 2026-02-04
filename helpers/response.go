@@ -7,7 +7,7 @@ import (
 
 func SuccessResponse(c *fiber.Ctx, data interface{}) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{
-		"status":  true,
+		"success": true,
 		"message": "success",
 		"data":    data,
 	})
