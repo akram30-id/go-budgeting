@@ -6,6 +6,7 @@ import (
 	"api-budgeting.smartcodex.cloud/config"
 	"api-budgeting.smartcodex.cloud/controllers"
 	cashcontroller "api-budgeting.smartcodex.cloud/controllers/cash_controller"
+	treasurycontroller "api-budgeting.smartcodex.cloud/controllers/treasury_controller"
 	"api-budgeting.smartcodex.cloud/middleware"
 	"api-budgeting.smartcodex.cloud/models"
 
@@ -32,6 +33,7 @@ func main() {
 		&models.DebtVirtualAccount{},
 		&models.DebtOutstanding{},
 		&models.DebtPayment{},
+		&models.DeveloperInfo{},
 	)
 
 	// throttling
@@ -53,6 +55,9 @@ func main() {
 
 	// debt := api.Group("/debt")
 	// debt.Get("/vendors", middleware.ApiAuth, debtcontroller.ShowListVendors)
+
+	treasury := api.Group("/treasury")
+	treasury.Post("/duplicate", middleware.ApiAuth, treasurycontroller.DuplicateTreasury)
 
 	cash := api.Group("/cash")
 	cash.Post("/sort-update", middleware.ApiAuth, cashcontroller.UpdateSortController)
