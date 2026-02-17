@@ -110,13 +110,14 @@ func DuplicateTreasuryService(req models.DuplicateTreasuryReq, c *fiber.Ctx) hel
 			IncomeValue        int64
 			ExpenseValue       int64
 			IsDebt             int
+			Sorts              int
 		}
 
 		var existingTreasuryDetail ExistingTreasuryDetail
 
 		if err := tx.
 			Table("treasury_detail AS a").
-			Select("a.treasury_detail_name, a.notes, a.income_value, a.expense_value, a.is_debt").
+			Select("a.treasury_detail_name, a.notes, a.income_value, a.expense_value, a.is_debt, a.sorts").
 			Where("a.treasury_no", treasuryNo).
 			Where("a.state", 1).
 			Where("a.treasury_detail_no", v).
@@ -155,6 +156,7 @@ func DuplicateTreasuryService(req models.DuplicateTreasuryReq, c *fiber.Ctx) hel
 				ExpenseValue       int64
 				IsDebt             int
 				UserId             int
+				Sorts              int
 				CreatedAt          time.Time
 			}
 
@@ -167,6 +169,7 @@ func DuplicateTreasuryService(req models.DuplicateTreasuryReq, c *fiber.Ctx) hel
 				IsDebt:             existingTreasuryDetail.IsDebt,
 				CreatedAt:          time.Now(),
 				UserId:             userID,
+				Sorts:              existingTreasuryDetail.Sorts,
 			}
 
 			if err := tx.Table("treasury_detail").Create(&treasuryDetail).Error; err != nil {
