@@ -62,6 +62,9 @@ func main() {
 	cash := api.Group("/cash")
 	cash.Post("/sort-update", middleware.ApiAuth, cashcontroller.UpdateSortController)
 
+	auth := api.Group("/auth")
+	auth.Post("/change-password", middleware.ApiAuth, controllers.ChangePassword)
+
 	// api.Post("/items", controllers.CreateItem).Use(middleware.ApiAuth)
 	// api.Get("/items", controllers.GetItems).Use(middleware.ApiAuth)
 	// api.Get("/items/:id", controllers.GetItem).Use(middleware.ApiAuth)

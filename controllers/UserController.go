@@ -4,7 +4,9 @@ import (
 	"api-budgeting.smartcodex.cloud/helpers"
 	"api-budgeting.smartcodex.cloud/models"
 	"api-budgeting.smartcodex.cloud/services"
+	"api-budgeting.smartcodex.cloud/services/auth"
 	"api-budgeting.smartcodex.cloud/validations"
+	uservalidation "api-budgeting.smartcodex.cloud/validations/user_validation"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -65,4 +67,33 @@ func Login(c *fiber.Ctx) error {
 		"user":    login.User,
 	})
 
+}
+
+func ChangePassword(c *fiber.Ctx) error {
+	var req uservalidation.ChangePasswordValidation
+
+	if err := c.BodyParser(&req); err != nil {
+		return helpers.ErrorResponse(c, 400, err.Error())
+	}
+
+	body := c.Body()
+
+	validateErr := helpers.ValidatePayload(body, &req)
+	if validateErr != "" {
+		return helpers.ErrorResponse(c, 400, validateErr)
+	}
+
+	request := models.ChangePasswordRequest{
+		OldPassword:     req.OldPassword,
+		NewPassword:     req.NewPassword,
+		ConfirmPassword: req.ConfirmPassword,
+	}
+
+	changePasswordService := auth.ChangePasswordService(request, c)
+
+	if !changePasswordService.Success {
+		return helpers.ErrorResponse(c, changePasswordService.HttpCode, changePasswordService.Message)
+	}
+
+	return helpers.SuccessResponse(c, changePasswordService.Data)
 }
