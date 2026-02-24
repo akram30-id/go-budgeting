@@ -36,3 +36,9 @@ type UserLoginSuccess struct {
 	Email  string `json:"email"`
 	RoleId int    `json:"role_id"`
 }
+
+type ChangePasswordRequest struct {
+	OldPassword     string `json:"old_password"`
+	NewPassword     string `json:"new_password"`
+	ConfirmPassword string `json:"confirm_password"`
+}
