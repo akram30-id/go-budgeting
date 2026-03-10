@@ -34,11 +34,12 @@ func main() {
 		&models.DebtOutstanding{},
 		&models.DebtPayment{},
 		&models.DeveloperInfo{},
+		&models.Treasury{},
 	)
 
 	// throttling
 	appLimiter := limiter.New(limiter.Config{
-		Max:        5,
+		Max:        1000,
 		Expiration: 30 * time.Second,
 	})
 
