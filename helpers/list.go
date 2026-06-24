@@ -3,6 +3,8 @@ package helpers
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
+	"math/rand/v2"
 	"strings"
 )
 
@@ -39,4 +41,12 @@ func StrPadRight(s string, length int, padChar string) string {
 func MD5Hash(text string) string {
 	hash := md5.Sum([]byte(text))
 	return hex.EncodeToString(hash[:])
+}
+
+func GenerateOTP(length int) string {
+	otp := ""
+	for i := 0; i < length; i++ {
+		otp += fmt.Sprintf("%d", rand.IntN(10)) // Angka 0-9
+	}
+	return otp
 }

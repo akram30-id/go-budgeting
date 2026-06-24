@@ -35,6 +35,7 @@ func main() {
 		&models.DebtPayment{},
 		&models.DeveloperInfo{},
 		&models.Treasury{},
+		&models.UserNotification{},
 	)
 
 	// throttling
@@ -48,6 +49,9 @@ func main() {
 	// TESTING ENDPOINT
 	app.Post("/api-test", appLimiter, controllers.TestPush)
 
+	// WEBOSCKET ENDPOINT HANDLER
+	app.Get("/ws/:id", controllers.WSNotificationHandler)
+
 	api := app.Group("/api")
 
 	// api.Post("/register", appLimiter, controllers.Register)
@@ -59,6 +63,11 @@ func main() {
 
 	treasury := api.Group("/treasury")
 	treasury.Post("/duplicate", middleware.ApiAuth, treasurycontroller.DuplicateTreasury)
+	treasury.Get("/members", middleware.ApiAuth, treasurycontroller.ListMembers)
+	treasury.Get("/find-users", middleware.ApiAuth, treasurycontroller.FindUsers)
+	treasury.Post("/invite-member", middleware.ApiAuth, treasurycontroller.InviteMember)
+	treasury.Post("/member-access", middleware.ApiAuth, treasurycontroller.UpdateMemberAccess)
+	treasury.Post("/remove-member", middleware.ApiAuth, treasurycontroller.RemoveMember)
 
 	cash := api.Group("/cash")
 	cash.Post("/sort-update", middleware.ApiAuth, cashcontroller.UpdateSortController)
@@ -66,15 +75,10 @@ func main() {
 	auth := api.Group("/auth")
 	auth.Post("/change-password", middleware.ApiAuth, controllers.ChangePassword)
 
-	// api.Post("/items", controllers.CreateItem).Use(middleware.ApiAuth)
-	// api.Get("/items", controllers.GetItems).Use(middleware.ApiAuth)
-	// api.Get("/items/:id", controllers.GetItem).Use(middleware.ApiAuth)
-	// api.Put("/items/:id", controllers.UpdateItem).Use(middleware.ApiAuth)
-	// api.Delete("/items/:id", controllers.DeleteItem).Use(middleware.ApiAuth)
-
-	// webhook := api.Group("/webhook")
-	// webhook.Post("/clients", controllers.RegisterClient).Use(middleware.ApiAuth)
-	// webhook.Post("/publish", controllers.PushToQueue).Use(middleware.ApiAuth)
+	// NOTIFICATION ENDPOINTS
+	notification := api.Group("/notification")
+	notification.Get("/current", middleware.ApiAuth, controllers.GetListNotification)
+	notification.Post("/accept-invite", middleware.ApiAuth, treasurycontroller.AcceptInvitation)
 
 	app.Listen(":3000")
 }
