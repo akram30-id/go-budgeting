@@ -87,7 +87,7 @@ func AllowOriginCors(origin string) bool {
 	allowed := []string{
 		"http://budgeting.test",
 		"http://admin.budgeting.test",
-		"https://budgeting.smartcodex.cloud",
+		"https://budgeting.smartcodex.my.id",
 		"http://202.10.47.104",
 	}
 	for _, o := range allowed {
